@@ -35,7 +35,7 @@
                 "AppImage",
                 "deb"
             ],
-            "icon": "build/icons",
+            "icon": "build/icons/icon.png",
             "category": "Utility"
         },
         "mac": {
@@ -43,6 +43,7 @@
                 "dmg",
                 "zip"
             ],
+            "icon": "build/icons/icon.png",
             "category": "public.app-category.utilities"
         },
         "win": {
@@ -50,7 +51,7 @@
                 "nsis",
                 "zip"
             ],
-            "icon": "build/icon.ico"
+            "icon": "build/icons/icon.png"
         }
     },
     "dependencies": {
