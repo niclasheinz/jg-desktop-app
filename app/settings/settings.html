@@ -1,0 +1,57 @@
+<!-- settings.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #fff;
+            color: #000;
+        }
+        body.dark {
+            background-color: #333;
+            color: #fff;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        button {
+            padding: 10px 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Settings</h2>
+    <label>
+        <input type="checkbox" id="darkModeToggle"> Dark Mode
+    </label>
+    <button id="closeButton">Close</button>
+
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const closeButton = document.getElementById('closeButton');
+
+        // Load the current mode from localStorage
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark');
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', () => {
+            const isChecked = darkModeToggle.checked;
+            document.body.classList.toggle('dark', isChecked);
+            localStorage.setItem('darkMode', isChecked);
+        });
+
+        closeButton.addEventListener('click', () => {
+            window.close(); // Close the settings modal
+        });
+    </script>
+</body>
+</html>
