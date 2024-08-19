@@ -8,7 +8,6 @@ build:
   script:
     - npm install
     - npm run build:linux
-    - npm run build:mac
     - npm run build:win
   artifacts:
     paths:
