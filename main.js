@@ -77,7 +77,7 @@ const menuTemplate = () => [
                 },
             },
             {
-                label: 'Fehler suchen',
+                label: 'Fehler melden',
                 click: () => {
                     shell.openExternal('https://gitlab.com/niclasheinz/jg-desktop-app/-/issues');
                 },
