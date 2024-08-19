@@ -2,16 +2,25 @@ stages:
   - build
   - release
 
-build:
+build:linux:
   stage: build
   image: node:14
   script:
     - npm install
     - npm run build:linux
+  artifacts:
+    paths:
+      - dist/  # Adjust this path to where your Linux build artifacts are located
+
+build:win:
+  stage: build
+  image: electronuserland/builder:wine
+  script:
+    - npm install
     - npm run build:win
   artifacts:
     paths:
-      - dist/  # Adjust this path to where your build artifacts are located
+      - dist/  # Adjust this path to where your Windows build artifacts are located
 
 release:
   stage: release
