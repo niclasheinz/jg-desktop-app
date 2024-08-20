@@ -52,7 +52,7 @@
                 "zip"
             ],
             "icon": "build/icons/icon.png",
-            "publisher": "Niclas Heinz"
+            "publisherName": "Niclas Heinz"
         }
     },
     "dependencies": {
