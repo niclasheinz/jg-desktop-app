@@ -36,8 +36,8 @@ upload:
       artifacts: true
   rules:
     - if: $CI_COMMIT_TAG
-      when: never # Do not run this job when a tag is created manually
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # Run this job when when commits are pushed to the default branch
+      when: never 
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH 
   script:
     - echo "${APPNAME}"
     - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file "./dist/${WIN_BINARY}" "${PACKAGE_REGISTRY_URL}/${WIN_BINARY}"'
