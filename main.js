@@ -141,7 +141,7 @@ async function checkForUpdates() {
                 showNotification(`Neue Version verfügbar: ${latestVersion}`);
             }
 
-            // Datum der letzten Überprüfung aktualisieren
+            // update last check date
             setLastCheckedDate(now);
         } catch (error) {
             console.error('Fehler beim Überprüfen auf Updates:', error);
@@ -157,7 +157,7 @@ function getLastCheckedDate() {
     try {
         return new Date(fs.readFileSync(path.join(app.getPath('userData'), 'lastChecked.txt'), 'utf8'));
     } catch (error) {
-        return new Date(0); // Wenn die Datei nicht existiert, als nie überprüft betrachten
+        return new Date(0); 
     }
 }
 
@@ -177,4 +177,12 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
+});
+
+const { ipcMain } = require('electron');
+
+
+ipcMain.handle('get-last-update', async () => {
+    const lastChecked = getLastCheckedDate();
+    return lastChecked.toLocaleString(); // Gibt das Datum als lesbare Zeichenfolge zurück
 });

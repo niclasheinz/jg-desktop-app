@@ -1,6 +1,6 @@
 {
     "name": "jg-desktop",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "description": "The official desktop app for Jubla Glattbrugg",
     "main": "main.js",
     "scripts": {
@@ -51,7 +51,8 @@
                 "nsis",
                 "zip"
             ],
-            "icon": "build/icons/icon.png"
+            "icon": "build/icons/icon.png",
+            "publisher": "Niclas Heinz"
         }
     },
     "dependencies": {
