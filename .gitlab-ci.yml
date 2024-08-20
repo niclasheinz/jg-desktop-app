@@ -8,7 +8,9 @@ build:linux:
   image: node:14
   script:
     - npm install
+    - npm install node-fetch@2
     - npm run build:linux
+
   artifacts:
     paths:
       - dist/  # Adjust this path to where your Linux build artifacts are located
@@ -18,6 +20,7 @@ build:win:
   image: electronuserland/builder:wine
   script:
     - npm install
+    - npm install node-fetch@2
     - npm run build:win
   artifacts:
     paths:
