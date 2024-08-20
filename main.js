@@ -4,6 +4,12 @@ const path = require('path');
 let mainWindow; // Declare mainWindow variable
 
 function createWindow() {
+    // Check if the mainWindow already exists
+    if (mainWindow) {
+        mainWindow.focus(); // Focus on the existing window
+        return; // Exit the function
+    }
+
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -19,6 +25,11 @@ function createWindow() {
     // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
     Menu.setApplicationMenu(menu);
+
+    // Handle window closed event
+    mainWindow.on('closed', () => {
+        mainWindow = null; // Dereference the window object
+    });
 }
 
 const menuTemplate = () => [
@@ -129,7 +140,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (mainWindow === null) {
         createWindow();
     }
 });
