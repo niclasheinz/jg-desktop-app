@@ -55,12 +55,12 @@ release_job:
     - echo "Creating release"
   release:
     name: 'Release $CI_COMMIT_TAG'
-    description: 'Release notes for version $CI_COMMIT_TAG'  # Optional: Du kannst die Release-Notizen hier anpassen
+    description: 'Release notes for version $CI_COMMIT_TAG'
     tag_name: '$CI_COMMIT_TAG'
     ref: '$CI_COMMIT_SHA'
     assets:
       links:
         - name: 'Linux Build Artifacts'
-          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/dist/*'  # Link zu den Linux-Artefakten
+          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/build:linux/artifacts/raw/dist/*'  # Link to the Linux artifacts
         - name: 'Windows Build Artifacts'
-          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/dist/*'  # Link zu den Windows-Artefakten
+          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/build:win/artifacts/raw/dist/*'  # Link to the Windows artifacts
