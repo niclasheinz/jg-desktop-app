@@ -22,7 +22,7 @@ build:
       - $CI_PROJECT_DIR/dist/*.*
     when: on_success
   only:
-    - main //specific branch build change branch according your repo
+    - main 
 
 variables:
   WIN_BINARY: '${APPNAME}-${VERSION}.exe'
