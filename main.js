@@ -126,7 +126,7 @@ function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'Über',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.4\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.7\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
