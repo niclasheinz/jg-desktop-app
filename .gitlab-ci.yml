@@ -31,7 +31,7 @@ build_windows:
 
 build_linux:
   stage: build
-  image: alpine:latest
+  image: node:14
   script:
     - echo "Building Linux application..."
     - npm install
