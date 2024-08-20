@@ -28,11 +28,26 @@ release:
   script:
     - echo "Creating release for $CI_COMMIT_TAG"
     - |
-      curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+      ASSET_URL="https://gitlab.com/your_project/-/jobs/$CI_JOB_ID/artifacts/download"
+      RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
            --data "name=Release $CI_COMMIT_TAG" \
            --data "tag_name=$CI_COMMIT_TAG" \
            --data "description=Release for version $CI_COMMIT_TAG" \
-           --data "assets[links][]=name=Asset&url=https://gitlab.com/your_project/-/jobs/$CI_JOB_ID/artifacts/download" \
-           "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases"
+           --data "assets[links][]=name=Asset&url=$ASSET_URL" \
+           "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases")
+      
+      # Get the body and the status code
+      BODY=$(echo "$RESPONSE" | sed -e 's/HTTPSTATUS\:.*//g')
+      STATUS=$(echo "$RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+      # Check if the request was successful
+      if [ "$STATUS" -ne 201 ]; then
+        echo "Failed to create release: $STATUS"
+        echo "Response: $BODY"
+        exit 1
+      else
+        echo "Release created successfully!"
+      fi
   only:
     - tags
+
