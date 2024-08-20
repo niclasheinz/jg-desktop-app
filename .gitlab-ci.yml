@@ -28,7 +28,7 @@ release:
   script:
     - echo "Creating release for $CI_COMMIT_TAG"
     - |
-      ASSET_URL="https://gitlab.com/your_project/-/jobs/$CI_JOB_ID/artifacts/download"
+      ASSET_URL="https://gitlab.com/$CI_PROJECT_ID/-/jobs/$CI_JOB_ID/artifacts/download"
       RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
            --data "name=Release $CI_COMMIT_TAG" \
            --data "tag_name=$CI_COMMIT_TAG" \
