@@ -3,25 +3,6 @@ stages:
   - prepare
   - release
 
-build:linux:
-  stage: build
-  image: node:14
-  script:
-    - npm install
-    - npm run build:linux
-  artifacts:
-    paths:
-      - dist/  # Adjust this path to where your Linux build artifacts are located
-
-build:win:
-  stage: build
-  image: electronuserland/builder:wine
-  script:
-    - npm install
-    - npm run build:win
-  artifacts:
-    paths:
-      - dist/  # Adjust this path to where your Windows build artifacts are located
 
 prepare_job:
   stage: prepare
@@ -36,22 +17,54 @@ prepare_job:
       - release_notes.md
     expire_in: 1 week  # Optional: Artefakte nach einer Woche ablaufen lassen
 
+build_windows:
+  stage: build
+  image: electronuserland/builder:wine
+  script:
+    - echo "Building Windows application..."
+    - npm install
+    - npm run build:win
+    - echo "Windows build output" > windows_output.txt
+  artifacts:
+    paths:
+      - windows_output.txt
+
+build_linux:
+  stage: build
+  image: alpine:latest
+  script:
+    - echo "Building Linux application..."
+    - npm install
+    - npm run build:linux
+    - echo "Linux build output" > linux_output.txt
+  artifacts:
+    paths:
+      - linux_output.txt
+
 release_job:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: prepare_job
-      artifacts: true  # Stelle sicher, dass Artefakte benötigt werden
+      artifacts: true
+    - job: build_windows
+      artifacts: true
+    - job: build_linux
+      artifacts: true
   rules:
   - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'
   script:
     - echo "Creating release"
   release:
     name: 'Release $CI_COMMIT_TAG'
-    description: '$(cat release_notes.md)'  # Lese die Release-Notizen aus der Datei
+    description: '$(cat release_notes.md)'  # Read release notes from the file
     tag_name: '$CI_COMMIT_TAG'
     ref: '$CI_COMMIT_SHA'
     assets:
       links:
+        - name: 'Windows Build Output'
+          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/windows_output.txt'
+        - name: 'Linux Build Output'
+          url: 'https://gitlab.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/linux_output.txt'
         - name: 'Container Image $CI_COMMIT_TAG'
           url: "https://$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA"
