@@ -1,7 +1,5 @@
-const { app, BrowserWindow, Menu, shell, dialog, Notification } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
-const fetch = require('node-fetch');
-const fs = require('fs');
 
 let mainWindow; // Declare mainWindow variable
 
@@ -21,9 +19,6 @@ function createWindow() {
     // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
     Menu.setApplicationMenu(menu);
-
-    // Check for updates
-    checkForUpdates();
 }
 
 const menuTemplate = () => [
@@ -120,49 +115,9 @@ function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'Über',
-        message: 'Jubla Glattbrugg Desktop App\nVersion ' + app.getVersion() + '\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.4\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
-}
-
-async function checkForUpdates() {
-    const currentVersion = app.getVersion();
-    const lastChecked = getLastCheckedDate();
-    const now = new Date();
-
-    // Überprüfen, ob eine Woche vergangen ist
-    if (now - lastChecked > 7 * 24 * 60 * 60 * 1000) {
-        try {
-            const response = await fetch('https://gitlab.com/api/v4/projects/60761284/releases');
-            const releases = await response.json();
-            const latestVersion = releases[0].tag_name; // oder wie auch immer die Version strukturiert ist
-
-            if (currentVersion !== latestVersion) {
-                showNotification(`Neue Version verfügbar: ${latestVersion}`);
-            }
-
-            // update last check date
-            setLastCheckedDate(now);
-        } catch (error) {
-            console.error('Fehler beim Überprüfen auf Updates:', error);
-        }
-    }
-}
-
-function showNotification(message) {
-    new Notification({ title: 'Update verfügbar', body: message }).show();
-}
-
-function getLastCheckedDate() {
-    try {
-        return new Date(fs.readFileSync(path.join(app.getPath('userData'), 'lastChecked.txt'), 'utf8'));
-    } catch (error) {
-        return new Date(0); 
-    }
-}
-
-function setLastCheckedDate(date) {
-    fs.writeFileSync(path.join(app.getPath('userData'), 'lastChecked.txt'), date.toString());
 }
 
 app.whenReady().then(createWindow);
@@ -177,12 +132,4 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
-});
-
-const { ipcMain } = require('electron');
-
-
-ipcMain.handle('get-last-update', async () => {
-    const lastChecked = getLastCheckedDate();
-    return lastChecked.toLocaleString(); // Gibt das Datum als lesbare Zeichenfolge zurück
 });
