@@ -31,17 +31,6 @@
         <input type="checkbox" id="darkModeToggle"> Dark Mode
     </label>
 
-    <div>
-        <h2>Letzte Aktualisierung</h2>
-        <p id="last-update"></p>
-    </div>
-    <script>
-        const { ipcRenderer } = require('electron');
-
-        // Hole die letzte Aktualisierungszeit
-        ipcRenderer.invoke('get-last-update').then(lastUpdate => {
-            document.getElementById('last-update').innerText = lastUpdate;
-        });
     </script>
 </body>
     <button id="closeButton">Close</button>
