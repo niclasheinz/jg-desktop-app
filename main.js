@@ -7,9 +7,10 @@ function createWindow() {
     // Check if the mainWindow already exists
     if (mainWindow) {
         mainWindow.focus(); // Focus on the existing window
-        return; // Exit the function
+        return; // Exit the function to prevent creating a new window
     }
 
+    // Create a new BrowserWindow instance
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -36,9 +37,9 @@ const menuTemplate = () => [
     {
         label: 'File',
         submenu: [
-            { label: 'Reload', click: () => mainWindow.reload() }, // Reload the current page
-            { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() }, // Force reload the current page
-            { label: 'Settings', click: openSettings }, // Add settings menu item
+            { label: 'Reload', click: () => mainWindow.reload() },
+            { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
+            { label: 'Settings', click: openSettings },
             { label: 'Exit', role: 'quit' },
         ],
     },
@@ -110,6 +111,7 @@ const menuTemplate = () => [
 ];
 
 function openSettings() {
+    // Check if settings window already exists
     const settingsWindow = new BrowserWindow({
         width: 400,
         height: 400,
