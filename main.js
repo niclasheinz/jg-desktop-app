@@ -1,13 +1,16 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
 
-let mainWindow;
+let mainWindow; // Declare mainWindow variable
 
 function createWindow(url) {
-    // Check if the main window already exists
+    // Check if the mainWindow already exists
     if (mainWindow) {
-        mainWindow.focus();
-        return;
+        mainWindow.focus(); // Focus on the existing window
+        if (url) {
+            mainWindow.loadURL(url); // Load the provided URL
+        }
+        return; // Exit the function to prevent creating a new window
     }
 
     // Create a new BrowserWindow instance
@@ -21,7 +24,11 @@ function createWindow(url) {
         },
     });
 
-    mainWindow.loadURL(url); // Load the passed URL
+    if (url) {
+        mainWindow.loadURL(url); // Load the provided URL
+    } else {
+        mainWindow.loadURL('https://jublaglattbrugg.ch'); // Default website
+    }
 
     // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
@@ -33,32 +40,21 @@ function createWindow(url) {
     });
 }
 
-// Register the custom URL protocol
-app.setAsDefaultProtocolClient('jgdesktop');
+// Add protocol handling for opening links directly in the app
+app.setAsDefaultProtocolClient('jgdesktop'); // Replace with your protocol
 
 app.on('open-url', (event, url) => {
-    event.preventDefault();
-    createWindow(url); // Open the window with the URL
+    event.preventDefault(); // Prevent the default behavior
+    createWindow(url); // Open the URL in the existing or new window
 });
 
 app.whenReady().then(() => {
-    // Check if the app was opened with a URL
-    if (process.argv.length >= 2) {
-        createWindow(process.argv[1]); // The first argument is the URL
+    // Check if the app was launched with a URL
+    if (process.argv.length > 1) {
+        const url = process.argv[1];
+        createWindow(url); // Load the URL directly if provided
     } else {
-        createWindow('https://jublaglattbrugg.ch'); // Default URL
-    }
-});
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit(); // Quit the app if not on macOS
-    }
-});
-
-app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow('https://jublaglattbrugg.ch'); // Default URL
+        createWindow(); // Otherwise, load the default website
     }
 });
 
@@ -140,6 +136,7 @@ const menuTemplate = () => [
 ];
 
 function openSettings() {
+    // Check if settings window already exists
     const settingsWindow = new BrowserWindow({
         width: 400,
         height: 400,
@@ -156,7 +153,19 @@ function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'About',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.10\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.8\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createWindow(); // Create a new window if none exists
+    }
+});
