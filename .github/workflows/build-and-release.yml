@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,8 +29,34 @@ jobs:
         run: |
           npm run build:linux
 
-      - name: Upload AppImage
+      - name: Upload Linux AppImage
         uses: actions/upload-artifact@v3
         with:
           name: jg-desktop-linux
           path: dist/*.AppImage  # Adjust this path if necessary
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Change this to your preferred Node.js version
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build Windows Packages
+        run: |
+          npm run build:win
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: jg-desktop-windows
+          path: dist/*.exe  # Adjust this path if necessary
