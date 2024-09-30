@@ -1,6 +1,6 @@
 {
     "name": "jg-desktop",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "The official desktop app for Jubla Glattbrugg",
     "main": "main.js",
     "scripts": {
