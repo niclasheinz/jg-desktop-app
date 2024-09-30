@@ -1,4 +1,4 @@
-name: Build and Release Electron App
+name: Build Electron App
 
 on:
   push:
@@ -7,55 +7,30 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
-    name: Build Desktop Applications
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      # Set up Node.js (updated to v18 to resolve EBADENGINE warning)
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: '18'  # Change this to your preferred Node.js version
 
-      # Install npm dependencies
       - name: Install dependencies
-        run: npm install
-
-      # Extract version and app name from package.json
-      - name: Get version and app name
-        id: vars
         run: |
-          echo "VERSION=$(node -e 'console.log(require(\"./package.json\").version)')" >> $GITHUB_ENV
-          echo "APPNAME=$(node -e 'console.log(require(\"./package.json\").productName)')" >> $GITHUB_ENV
+          npm install
 
-      # Build application based on OS
-      - name: Build for ${{ matrix.os }}
+      - name: Build Linux AppImage
         run: |
-          if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
-            npm run build:win
-          elif [[ "${{ matrix.os }}" == 'ubuntu-latest' ]]; then
-            npm run build:linux
-          elif [[ "${{ matrix.os }}" == 'macos-latest' ]]; then
-            npm run build:mac
+          npm run build:linux
 
-      # Upload artifacts based on OS
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}-build
-          path: |
-            dist/*.exe
-            dist/*.AppImage
-            dist/*.dmg
-          retention-days: 5
+          name: jg-desktop-linux
+          path: dist/*.AppImage  # Adjust this path if necessary
