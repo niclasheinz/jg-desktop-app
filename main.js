@@ -1,13 +1,13 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
 
-let mainWindow; // Declare mainWindow variable
+let mainWindow;
 
-function createWindow() {
-    // Check if the mainWindow already exists
+function createWindow(url) {
+    // Check if the main window already exists
     if (mainWindow) {
-        mainWindow.focus(); // Focus on the existing window
-        return; // Exit the function to prevent creating a new window
+        mainWindow.focus();
+        return;
     }
 
     // Create a new BrowserWindow instance
@@ -21,7 +21,7 @@ function createWindow() {
         },
     });
 
-    mainWindow.loadURL('https://jublaglattbrugg.ch'); // Load the website
+    mainWindow.loadURL(url); // Load the passed URL
 
     // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
@@ -33,46 +33,75 @@ function createWindow() {
     });
 }
 
+// Register the custom URL protocol
+app.setAsDefaultProtocolClient('jgdesktop');
+
+app.on('open-url', (event, url) => {
+    event.preventDefault();
+    createWindow(url); // Open the window with the URL
+});
+
+app.whenReady().then(() => {
+    // Check if the app was opened with a URL
+    if (process.argv.length >= 2) {
+        createWindow(process.argv[1]); // The first argument is the URL
+    } else {
+        createWindow('https://jublaglattbrugg.ch'); // Default URL
+    }
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit(); // Quit the app if not on macOS
+    }
+});
+
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createWindow('https://jublaglattbrugg.ch'); // Default URL
+    }
+});
+
 const menuTemplate = () => [
     {
-        label: 'Datei',
+        label: 'File',
         submenu: [
-            { label: 'Seite neu laden', click: () => mainWindow.reload() },
-            { label: 'Erzwinge neu laden', click: () => mainWindow.webContents.reloadIgnoringCache() },
-            { label: 'Einstellungen', click: openSettings },
-            { label: 'Schliessen', role: 'quit' },
+            { label: 'Reload Page', click: () => mainWindow.reload() },
+            { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
+            { label: 'Settings', click: openSettings },
+            { label: 'Close', role: 'quit' },
         ],
     },
     {
-        label: 'Bearbeiten',
+        label: 'Edit',
         submenu: [
-            { role: 'Rückgängig' },
-            { role: 'Wiederherstellen' },
+            { role: 'undo' },
+            { role: 'redo' },
             { type: 'separator' },
-            { role: 'Ausschneiden' },
-            { role: 'Kopieren' },
-            { role: 'Einfügen' },
+            { role: 'cut' },
+            { role: 'copy' },
+            { role: 'paste' },
         ],
     },
     {
-        label: 'Ansicht',
+        label: 'View',
         submenu: [
             {
-                label: 'Hineinzoomen',
+                label: 'Zoom In',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
                 },
             },
             {
-                label: 'Herauszoomen',
+                label: 'Zoom Out',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel - 1);
                 },
             },
             {
-                label: 'Zoom zurücksetzen',
+                label: 'Reset Zoom',
                 click: () => {
                     mainWindow.webContents.setZoomLevel(0); // Reset to default zoom level
                 },
@@ -80,16 +109,16 @@ const menuTemplate = () => [
         ],
     },
     {
-        label: 'Hilfe',
+        label: 'Help',
         submenu: [
             {
-                label: 'Dokumentation',
+                label: 'Documentation',
                 click: () => {
                     shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki');
                 },
             },
             {
-                label: 'Fehler melden',
+                label: 'Report a Bug',
                 click: () => {
                     shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug');
                 },
@@ -101,7 +130,7 @@ const menuTemplate = () => [
                 },
             },
             {
-                label: 'Über',
+                label: 'About',
                 click: () => {
                     showAboutDialog();
                 },
@@ -111,7 +140,6 @@ const menuTemplate = () => [
 ];
 
 function openSettings() {
-    // Check if settings window already exists
     const settingsWindow = new BrowserWindow({
         width: 400,
         height: 400,
@@ -127,22 +155,8 @@ function openSettings() {
 function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
-        title: 'Über',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.8\nDie offizielle Jubla Glattbrugg Desktop App.',
+        title: 'About',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.8\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
-
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
-    }
-});

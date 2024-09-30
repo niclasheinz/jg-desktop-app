@@ -53,9 +53,12 @@
             ],
             "icon": "build/icons/icon.png",
             "publisherName": "Niclas Heinz"
+        },
+        "protocols": {
+            "schemes": ["jgdesktop"] 
         }
     },
     "dependencies": {
         "i18next": "^23.12.2"
-        }
+    }
 }
