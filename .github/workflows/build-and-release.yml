@@ -2,11 +2,8 @@ name: Build Electron App
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - '*'  # This will trigger the workflow on any tag push
 
 jobs:
   build-linux:
