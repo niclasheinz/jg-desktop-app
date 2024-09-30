@@ -1,0 +1,108 @@
+name: Build and Release Electron App
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Only trigger on version tags (e.g., v1.0.0)
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Desktop Applications
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install npm dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Build application
+      - name: Build for ${{ matrix.os }}
+        run: |
+          export VERSION=$(node -e "console.log(require('./package.json').version)")
+          export APPNAME=$(node -e "console.log(require('./package.json').productName)")
+          echo "VERSION=$VERSION" >> variables.env
+          echo "APPNAME=$APPNAME" >> variables.env
+          if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
+            npm run build:win
+          elif [[ "${{ matrix.os }}" == 'ubuntu-latest' ]]; then
+            npm run build:linux
+          elif [[ "${{ matrix.os }}" == 'macos-latest' ]]; then
+            npm run build:mac
+      # Upload artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-build
+          path: dist/*.*
+          retention-days: 5
+
+  release:
+    name: Create GitHub Release and Attach Artifacts
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Download artifacts from build jobs
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./dist
+
+      # Create GitHub release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Release version ${{ github.ref }}.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload release assets
+      - name: Upload Windows Artifact
+        uses: actions/upload-release-asset@v1
+        if: matrix.os == 'windows-latest'
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/*.exe
+          asset_name: ${{ matrix.os }}-build-${{ github.ref }}.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-release-asset@v1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/*.AppImage
+          asset_name: ${{ matrix.os }}-build-${{ github.ref }}.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload MacOS Artifact
+        uses: actions/upload-release-asset@v1
+        if: matrix.os == 'macos-latest'
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/*.dmg
+          asset_name: ${{ matrix.os }}-build-${{ github.ref }}.dmg
+          asset_content_type: application/octet-stream
