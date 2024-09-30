@@ -27,6 +27,9 @@
         "electron": "v31.3.0",
         "electron-builder": "^24.13.3"
     },
+    "dependencies": {
+        "i18next": "^23.12.2"
+    },
     "build": {
         "appId": "ch.niclasheinz.jg-desktop",
         "productName": "JG Desktop",
@@ -54,11 +57,11 @@
             "icon": "build/icons/icon.png",
             "publisherName": "Niclas Heinz"
         },
-        "protocols": {
-            "schemes": ["jgdesktop"] 
-        }
-    },
-    "dependencies": {
-        "i18next": "^23.12.2"
+        "protocols": [
+            {
+                "name": "Jubla Glattbrugg Protocol",
+                "schemes": ["jgdesktop"]
+            }
+        ]
     }
 }
