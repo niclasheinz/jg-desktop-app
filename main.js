@@ -35,44 +35,44 @@ function createWindow() {
 
 const menuTemplate = () => [
     {
-        label: 'File',
+        label: 'Datei',
         submenu: [
-            { label: 'Reload', click: () => mainWindow.reload() },
-            { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
-            { label: 'Settings', click: openSettings },
-            { label: 'Exit', role: 'quit' },
+            { label: 'Seite neu laden', click: () => mainWindow.reload() },
+            { label: 'Erzwinge neu laden', click: () => mainWindow.webContents.reloadIgnoringCache() },
+            { label: 'Einstellungen', click: openSettings },
+            { label: 'Schliessen', role: 'quit' },
         ],
     },
     {
-        label: 'Edit',
+        label: 'Bearbeiten',
         submenu: [
-            { role: 'undo' },
-            { role: 'redo' },
+            { role: 'Rückgängig' },
+            { role: 'Wiederherstellen' },
             { type: 'separator' },
-            { role: 'cut' },
-            { role: 'copy' },
-            { role: 'paste' },
+            { role: 'Ausschneiden' },
+            { role: 'Kopieren' },
+            { role: 'Einfügen' },
         ],
     },
     {
-        label: 'View',
+        label: 'Ansicht',
         submenu: [
             {
-                label: 'Zoom In',
+                label: 'Hineinzoomen',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
                 },
             },
             {
-                label: 'Zoom Out',
+                label: 'Herauszoomen',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel - 1);
                 },
             },
             {
-                label: 'Reset Zoom',
+                label: 'Zoom zurücksetzen',
                 click: () => {
                     mainWindow.webContents.setZoomLevel(0); // Reset to default zoom level
                 },
@@ -80,7 +80,7 @@ const menuTemplate = () => [
         ],
     },
     {
-        label: 'Help',
+        label: 'Hilfe',
         submenu: [
             {
                 label: 'Dokumentation',
@@ -128,7 +128,7 @@ function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'Über',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.7\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.8\nDie offizielle Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
