@@ -30,7 +30,7 @@ jobs:
           npm run build:linux
 
       - name: Upload AppImage
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jg-desktop-linux
           path: dist/*.AppImage  # Adjust this path if necessary
