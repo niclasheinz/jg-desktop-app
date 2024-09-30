@@ -60,3 +60,29 @@ jobs:
         with:
           name: jg-desktop-windows
           path: dist/*.exe  # Adjust this path if necessary
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Change this to your preferred Node.js version
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build macOS Packages
+        run: |
+          npm run build:mac
+
+      - name: Upload macOS Package
+        uses: actions/upload-artifact@v3
+        with:
+          name: jg-desktop-macos
+          path: dist/*.dmg  # Adjust this path if necessary
