@@ -1,5 +1,6 @@
 # Jubla Glattbrugg Desktop App
 [![Build Electron App](https://github.com/niclasheinz/jg-desktop-app/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/niclasheinz/jg-desktop-app/actions/workflows/build-and-release.yml)
+
 Dies ist die Desktop Applikation für die Jubla Website mit exklusiven Funktionen.
 
 Funktionen:
