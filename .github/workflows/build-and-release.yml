@@ -22,11 +22,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js
+      # Set up Node.js (updated to v18 to resolve EBADENGINE warning)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       # Install npm dependencies
       - name: Install dependencies
@@ -38,7 +38,6 @@ jobs:
         run: |
           echo "VERSION=$(node -e 'console.log(require(\"./package.json\").version)')" >> $GITHUB_ENV
           echo "APPNAME=$(node -e 'console.log(require(\"./package.json\").productName)')" >> $GITHUB_ENV
-        shell: bash
 
       # Build application based on OS
       - name: Build for ${{ matrix.os }}
@@ -49,7 +48,6 @@ jobs:
             npm run build:linux
           elif [[ "${{ matrix.os }}" == 'macos-latest' ]]; then
             npm run build:mac
-        shell: bash
 
       # Upload artifacts based on OS
       - name: Upload build artifacts
