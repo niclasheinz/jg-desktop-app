@@ -85,19 +85,19 @@ const menuTemplate = () => [
             {
                 label: 'Dokumentation',
                 click: () => {
-                    shell.openExternal('https://gitlab.com/niclasheinz/jg-desktop-app/-/wikis/home');
+                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki');
                 },
             },
             {
                 label: 'Fehler melden',
                 click: () => {
-                    shell.openExternal('https://gitlab.com/niclasheinz/jg-desktop-app/-/issues');
+                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug');
                 },
             },
             {
                 label: 'Support',
                 click: () => {
-                    shell.openExternal('https://gitlab.com/niclasheinz/jg-desktop-app/-/wikis/support');
+                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support');
                 },
             },
             {
