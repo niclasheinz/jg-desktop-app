@@ -5,10 +5,9 @@ let mainWindow;
 
 // Function to create the main application window
 function createWindow(url = 'https://jublaglattbrugg.ch') {
-    // If the window exists, focus and load the new URL
     if (mainWindow) {
         mainWindow.focus();
-        loadUrlInWindow(mainWindow, url);
+        loadUrlInWindow(mainWindow, url); // Load the URL in the existing window
         return;
     }
 
@@ -23,12 +22,8 @@ function createWindow(url = 'https://jublaglattbrugg.ch') {
         },
     });
 
-    // Load the allowed URL and display loader
-    if (isAllowedUrl(url)) {
-        loadUrlInWindow(mainWindow, url);
-    } else {
-        dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
-    }
+    // Load the allowed URL
+    loadUrlInWindow(mainWindow, url);
 
     // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
@@ -53,12 +48,28 @@ function loadUrlInWindow(window, url) {
 
     // Show loader until the page is ready
     window.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(loaderHtml)}`, { baseURLForDataURL: '' });
-    
-    window.webContents.once('did-finish-load', () => {
-        if (isAllowedUrl(url)) {
+
+    // Check if the URL is allowed and show confirmation dialog if it is a specific URL pattern
+    if (isAllowedUrl(url)) {
+        if (/^https:\/\/jublaglattbrugg\.ch\/.*$/.test(url)) {
+            dialog.showMessageBox(window, {
+                type: 'question',
+                buttons: ['Cancel', 'Open'],
+                title: 'Confirm Navigation',
+                message: `Are you sure you want to navigate to ${url}?`
+            }).then((result) => {
+                if (result.response === 1) { // 1 corresponds to 'Open'
+                    window.loadURL(url);
+                } else {
+                    window.loadURL('about:blank'); // Load a blank page if cancelled
+                }
+            });
+        } else {
             window.loadURL(url);
         }
-    });
+    } else {
+        dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
+    }
 }
 
 // Check if the URL is allowed
@@ -94,7 +105,7 @@ const menuTemplate = () => [
         label: 'Ansicht',
         submenu: [
             {
-                label: 'Hereinzoom',
+                label: 'Hereinzoomen',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
@@ -116,18 +127,10 @@ const menuTemplate = () => [
     {
         label: 'Hilfe',
         submenu: [
-          //  {
-          //      label: 'Dokumentation',
-          //      click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki'),
-          //  },
             {
                 label: 'Fehler melden',
                 click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug'),
             },
-            //{
-            //    label: 'Support',
-            //    click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support'),
-            //},
             {
                 label: 'Über',
                 click: () => showAboutDialog(),
@@ -158,6 +161,8 @@ function showAboutDialog() {
 }
 
 // Ensure single instance of the app
+app.requestSingleInstanceLock();
+
 app.whenReady().then(() => {
     const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
@@ -184,12 +189,8 @@ app.on('second-instance', (event, argv) => {
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
 
     if (mainWindow) {
-        if (isAllowedUrl(urlToLoad)) {
-            loadUrlInWindow(mainWindow, urlToLoad);
-        } else {
-            dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
-        }
-        mainWindow.focus();
+        loadUrlInWindow(mainWindow, urlToLoad);
+        mainWindow.focus(); // Bring the existing window to the front
     } else {
         createWindow(urlToLoad);
     }
