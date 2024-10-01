@@ -85,12 +85,12 @@ const menuTemplate = () => [
     {
         label: 'Bearbeiten',
         submenu: [
-            { role: 'Rückgängig' },
-            { role: 'Wiederherstellen' },
+            { role: 'undo' },
+            { role: 'redo' },
             { type: 'separator' },
-            { role: 'Ausschneiden' },
-            { role: 'Kopieren' },
-            { role: 'Einfügen' },
+            { role: 'cut' },
+            { role: 'copy' },
+            { role: 'paste' },
         ],
     },
     {
