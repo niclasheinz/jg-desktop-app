@@ -3,16 +3,16 @@ const path = require('path');
 
 let mainWindow;
 
-// Create a window or focus on the existing one
+// Function to create the main application window
 function createWindow(url = 'https://jublaglattbrugg.ch') {
-    // Check if the mainWindow already exists
+    // If the window exists, focus and load the new URL
     if (mainWindow) {
         mainWindow.focus();
-        mainWindow.loadURL(url);
+        loadUrlInWindow(mainWindow, url);
         return;
     }
 
-    // Create a new BrowserWindow
+    // Create the BrowserWindow
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -23,9 +23,9 @@ function createWindow(url = 'https://jublaglattbrugg.ch') {
         },
     });
 
-    // Check if the URL is allowed
+    // Load the allowed URL and display loader
     if (isAllowedUrl(url)) {
-        mainWindow.loadURL(url);
+        loadUrlInWindow(mainWindow, url);
     } else {
         dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
     }
@@ -40,14 +40,35 @@ function createWindow(url = 'https://jublaglattbrugg.ch') {
     });
 }
 
-// Allowed domain check
+// Function to load a URL into the window with a loader
+function loadUrlInWindow(window, url) {
+    const loaderHtml = `
+        <style>
+            body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: Arial, sans-serif; }
+            .loader { border: 16px solid #f3f3f3; border-top: 16px solid #3498db; border-radius: 50%; width: 120px; height: 120px; animation: spin 2s linear infinite; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+        <div class="loader"></div>
+    `;
+
+    // Show loader until the page is ready
+    window.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(loaderHtml)}`, { baseURLForDataURL: '' });
+    
+    window.webContents.once('did-finish-load', () => {
+        if (isAllowedUrl(url)) {
+            window.loadURL(url);
+        }
+    });
+}
+
+// Check if the URL is allowed
 function isAllowedUrl(url) {
     const allowedDomains = ['jublaglattbrugg.ch'];
     const parsedUrl = new URL(url);
     return allowedDomains.includes(parsedUrl.hostname);
 }
 
-// Build the menu template
+// Menu template
 const menuTemplate = () => [
     {
         label: 'File',
@@ -136,6 +157,7 @@ function showAboutDialog() {
     });
 }
 
+// Ensure single instance of the app
 app.whenReady().then(() => {
     const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
@@ -156,14 +178,14 @@ app.on('activate', () => {
 
 app.setAsDefaultProtocolClient('jgdesktop');
 
-// Handle deep linking if app is already running
+// Handle deep linking when app is already running
 app.on('second-instance', (event, argv) => {
     const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
 
     if (mainWindow) {
         if (isAllowedUrl(urlToLoad)) {
-            mainWindow.loadURL(urlToLoad);
+            loadUrlInWindow(mainWindow, urlToLoad);
         } else {
             dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
         }
