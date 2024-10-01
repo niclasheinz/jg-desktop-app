@@ -9,7 +9,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }} # Use your token her
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use your token here
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -20,12 +20,10 @@ jobs:
           node-version: '18'  # Change this to your preferred Node.js version
 
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Build Linux AppImage
-        run: |
-          npm run build:linux
+        run: npm run build:linux
 
       - name: Upload Linux AppImage
         uses: actions/upload-artifact@v4
@@ -35,7 +33,8 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use your token here
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -46,12 +45,10 @@ jobs:
           node-version: '18'  # Change this to your preferred Node.js version
 
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Build Windows Packages
-        run: |
-          npm run build:win
+        run: npm run build:win
 
       - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
@@ -61,7 +58,8 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
-
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use your token here
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -72,12 +70,10 @@ jobs:
           node-version: '18'  # Change this to your preferred Node.js version
 
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Build macOS Packages
-        run: |
-          npm run build:mac
+        run: npm run build:mac
 
       - name: Upload macOS Package
         uses: actions/upload-artifact@v4
