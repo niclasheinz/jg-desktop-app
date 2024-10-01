@@ -1,13 +1,33 @@
-const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
+const configPath = path.join(__dirname, 'config.json');
+let settings = { alwaysOpenInApp: false, enableProtocol: true }; // Default settings
+
+// Function to read config
+function readConfig() {
+    if (fs.existsSync(configPath)) {
+        const configData = fs.readFileSync(configPath);
+        return JSON.parse(configData);
+    }
+    return settings; // Return default settings if config file doesn't exist
+}
+
+// Function to write config
+function writeConfig(config) {
+    fs.writeFileSync(configPath, JSON.stringify(config), 'utf-8');
+}
+
+// Load settings from config file
+settings = readConfig();
 
 // Function to create the main application window
 function createWindow(url = 'https://jublaglattbrugg.ch') {
     if (mainWindow) {
         mainWindow.focus();
-        loadUrlInWindow(mainWindow, url); // Load the URL in the existing window
+        loadUrlInWindow(mainWindow, url);
         return;
     }
 
@@ -19,6 +39,7 @@ function createWindow(url = 'https://jublaglattbrugg.ch') {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            preload: path.join(__dirname, 'preload.js') // Use preload script for IPC
         },
     });
 
@@ -51,7 +72,7 @@ function loadUrlInWindow(window, url) {
 
     // Check if the URL is allowed and show confirmation dialog if it is a specific URL pattern
     if (isAllowedUrl(url)) {
-        if (/^https:\/\/jublaglattbrugg\.ch\/.*$/.test(url)) {
+        if (settings.alwaysOpenInApp && /^https:\/\/jublaglattbrugg\.ch\/.*$/.test(url)) {
             dialog.showMessageBox(window, {
                 type: 'question',
                 buttons: ['Cancel', 'Open'],
@@ -146,6 +167,7 @@ function openSettings() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            preload: path.join(__dirname, 'preload.js') // Use preload script for IPC
         },
     });
     settingsWindow.loadFile(path.join(__dirname, 'app/settings/settings.html'));
@@ -164,6 +186,10 @@ function showAboutDialog() {
 app.requestSingleInstanceLock();
 
 app.whenReady().then(() => {
+    // Read the config to determine settings
+    settings = readConfig();
+
+    // Load initial URL
     const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
     createWindow(urlToLoad);
@@ -190,8 +216,16 @@ app.on('second-instance', (event, argv) => {
 
     if (mainWindow) {
         loadUrlInWindow(mainWindow, urlToLoad);
-        mainWindow.focus(); // Bring the existing window to the front
+        mainWindow.focus();
     } else {
         createWindow(urlToLoad);
     }
+});
+
+// IPC handlers for settings
+ipcMain.handle('get-settings', () => settings);
+
+ipcMain.on('save-settings', (event, newSettings) => {
+    settings = newSettings;
+    writeConfig(settings); // Save settings to config file
 });
