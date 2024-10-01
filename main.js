@@ -78,7 +78,7 @@ const menuTemplate = () => [
         submenu: [
             { label: 'Reload Page', click: () => mainWindow.reload() },
             { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
-            { label: 'Settings', click: openSettings },
+           // { label: 'Settings', click: openSettings },
             { label: 'Close', role: 'quit' },
         ],
     },

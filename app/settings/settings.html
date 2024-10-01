@@ -9,10 +9,6 @@
     <h1>Einstellungen</h1>
     <form id="settings-form">
         <label>
-            <input type="checkbox" id="alwaysOpenInApp"> 
-            Immer jublaglattbrugg.ch in der App öffnen
-        </label><br><br>
-        <label>
             <input type="checkbox" id="enableProtocol"> 
             jgdesktop:// Protokoll aktivieren
         </label><br><br>
@@ -25,7 +21,6 @@
         // Load current settings
         window.onload = () => {
             ipcRenderer.invoke('get-settings').then(settings => {
-                document.getElementById('alwaysOpenInApp').checked = settings.alwaysOpenInApp;
                 document.getElementById('enableProtocol').checked = settings.enableProtocol;
             });
         };
@@ -34,7 +29,6 @@
         document.getElementById('settings-form').onsubmit = (event) => {
             event.preventDefault();
             const settings = {
-                alwaysOpenInApp: document.getElementById('alwaysOpenInApp').checked,
                 enableProtocol: document.getElementById('enableProtocol').checked,
             };
             ipcRenderer.send('save-settings', settings);
