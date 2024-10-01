@@ -50,6 +50,9 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+      - name: Electron Updater
+        run: | 
+          npm list electron-updater
 
       - name: Build Windows Packages
         run: |
