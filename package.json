@@ -25,7 +25,8 @@
     "homepage": "https://gitlab.com/niclasheinz/jg-desktop-app#readme",
     "devDependencies": {
         "electron": "v31.3.0",
-        "electron-builder": "^24.13.3"
+        "electron-builder": "^24.13.3",
+        "electron-updater": "^5.0.2"
     },
     "dependencies": {
         "i18next": "^23.12.2"
@@ -61,6 +62,14 @@
             {
                 "name": "Jubla Glattbrugg Protocol",
                 "schemes": ["jgdesktop"]
+            }
+        ],
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "niclasheinz",
+                "repo": "jg-desktop-app",
+                "releaseType": "release"
             }
         ]
     }

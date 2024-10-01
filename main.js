@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater'); // Import autoUpdater
 const path = require('path');
 const fs = require('fs');
 
@@ -12,7 +13,7 @@ const configPath = path.join(__dirname, 'config.json');
 function ensureConfigFile() {
     // Default config data
     const defaultConfigData = {
-        enableProtocol: true      // Default value
+        enableProtocol: true // Default value
     };
 
     // Check if config.json exists, if not create it
@@ -51,6 +52,9 @@ function createWindow(url) {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    // Check for updates
+    autoUpdater.checkForUpdatesAndNotify(); // Check for updates on app start
 }
 
 // Function to load a URL into the window with a loader
@@ -65,7 +69,7 @@ function loadUrlInWindow(window, url) {
     `;
 
     window.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(loaderHtml)}`, { baseURLForDataURL: '' });
-    
+
     window.webContents.once('did-finish-load', () => {
         window.loadURL(url);
     });
@@ -78,7 +82,6 @@ const menuTemplate = () => [
         submenu: [
             { label: 'Reload Page', click: () => mainWindow.reload() },
             { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
-           // { label: 'Settings', click: openSettings },
             { label: 'Close', role: 'quit' },
         ],
     },
@@ -131,18 +134,6 @@ const menuTemplate = () => [
     },
 ];
 
-function openSettings() {
-    const settingsWindow = new BrowserWindow({
-        width: 400,
-        height: 400,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-        },
-    });
-    settingsWindow.loadFile(path.join(__dirname, 'app/settings/settings.html'));
-}
-
 // Show About dialog
 function showAboutDialog() {
     dialog.showMessageBox({
@@ -152,6 +143,27 @@ function showAboutDialog() {
         buttons: ['OK'],
     });
 }
+
+// Auto-update events
+autoUpdater.on('update-available', () => {
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Available',
+        message: 'A new version is available. It will be downloaded in the background.',
+        buttons: ['OK']
+    });
+});
+
+autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Ready',
+        message: 'The update is downloaded. It will be installed now.',
+        buttons: ['OK']
+    }).then(() => {
+        autoUpdater.quitAndInstall();
+    });
+});
 
 // Ensure single instance of the app
 app.whenReady().then(() => {
