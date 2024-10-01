@@ -12,7 +12,6 @@ const configPath = path.join(__dirname, 'config.json');
 function ensureConfigFile() {
     // Default config data
     const defaultConfigData = {
-        alwaysOpenInApp: false,  // Default value
         enableProtocol: true      // Default value
     };
 
@@ -44,11 +43,7 @@ function createWindow(url) {
         },
     });
 
-    if (settings.alwaysOpenInApp) {
-        loadUrlInWindow(mainWindow, 'https://jublaglattbrugg.ch');
-    } else {
-        loadUrlInWindow(mainWindow, url);
-    }
+    loadUrlInWindow(mainWindow, 'https://jublaglattbrugg.ch');
 
     const menu = Menu.buildFromTemplate(menuTemplate());
     Menu.setApplicationMenu(menu);
@@ -161,9 +156,7 @@ function showAboutDialog() {
 // Ensure single instance of the app
 app.whenReady().then(() => {
     ensureConfigFile(); // Ensure the config file is present
-    const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
-    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
-    createWindow(urlToLoad);
+    createWindow('https://jublaglattbrugg.ch');
 });
 
 app.on('window-all-closed', () => {
@@ -183,13 +176,15 @@ app.setAsDefaultProtocolClient('jgdesktop');
 // Handle deep linking when app is already running
 app.on('second-instance', (event, argv) => {
     const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
-    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
+    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : null;
 
     if (mainWindow) {
-        loadUrlInWindow(mainWindow, urlToLoad);
+        if (urlToLoad === 'https://jublaglattbrugg.ch') {
+            loadUrlInWindow(mainWindow, urlToLoad);
+        }
         mainWindow.focus();
     } else {
-        createWindow(urlToLoad);
+        createWindow('https://jublaglattbrugg.ch');
     }
 });
 
