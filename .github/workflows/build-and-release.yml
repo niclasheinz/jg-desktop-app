@@ -5,6 +5,9 @@ on:
     tags:
       - '*'  # This will trigger the workflow on any tag push
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Set the GH_TOKEN globally
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -23,10 +26,6 @@ jobs:
           npm install
 
       - name: Build Linux AppImage
-        with: # Set the secret as an input
-        super_secret: ${{ secrets.GH_TOKEN }}
-        env: # Or as an environment variable
-        super_secret: ${{ secrets.GH_TOKEN }}
         run: |
           npm run build:linux
 
@@ -103,5 +102,3 @@ jobs:
             dist/*.AppImage
             dist/*.exe
             dist/*.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret GH_TOKEN
