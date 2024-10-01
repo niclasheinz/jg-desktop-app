@@ -34,7 +34,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use your token here
+      GH_TOKEN: ${{ GH_TOKEN.GH_TOKEN }}  # Use your token here
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
