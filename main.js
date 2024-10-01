@@ -1,19 +1,18 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
 
-let mainWindow; // Declare mainWindow variable
+let mainWindow;
 
-function createWindow(url) {
+// Create a window or focus on the existing one
+function createWindow(url = 'https://jublaglattbrugg.ch') {
     // Check if the mainWindow already exists
     if (mainWindow) {
-        mainWindow.focus(); // Focus on the existing window
-        if (url) {
-            mainWindow.loadURL(url); // Load the provided URL
-        }
-        return; // Exit the function to prevent creating a new window
+        mainWindow.focus();
+        mainWindow.loadURL(url);
+        return;
     }
 
-    // Create a new BrowserWindow instance
+    // Create a new BrowserWindow
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -24,10 +23,11 @@ function createWindow(url) {
         },
     });
 
-    if (url) {
-        mainWindow.loadURL(url); // Load the provided URL
+    // Check if the URL is allowed
+    if (isAllowedUrl(url)) {
+        mainWindow.loadURL(url);
     } else {
-        mainWindow.loadURL('https://jublaglattbrugg.ch'); // Default website
+        dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
     }
 
     // Create the menu
@@ -36,28 +36,18 @@ function createWindow(url) {
 
     // Handle window closed event
     mainWindow.on('closed', () => {
-        mainWindow = null; // Dereference the window object
+        mainWindow = null;
     });
 }
 
-// Add protocol handling for opening links directly in the app
-app.setAsDefaultProtocolClient('jgdesktop'); // Replace with your protocol
+// Allowed domain check
+function isAllowedUrl(url) {
+    const allowedDomains = ['jublaglattbrugg.ch'];
+    const parsedUrl = new URL(url);
+    return allowedDomains.includes(parsedUrl.hostname);
+}
 
-app.on('open-url', (event, url) => {
-    event.preventDefault(); // Prevent the default behavior
-    createWindow(url); // Open the URL in the existing or new window
-});
-
-app.whenReady().then(() => {
-    // Check if the app was launched with a URL
-    if (process.argv.length > 1) {
-        const url = process.argv[1];
-        createWindow(url); // Load the URL directly if provided
-    } else {
-        createWindow(); // Otherwise, load the default website
-    }
-});
-
+// Build the menu template
 const menuTemplate = () => [
     {
         label: 'File',
@@ -98,9 +88,7 @@ const menuTemplate = () => [
             },
             {
                 label: 'Reset Zoom',
-                click: () => {
-                    mainWindow.webContents.setZoomLevel(0); // Reset to default zoom level
-                },
+                click: () => mainWindow.webContents.setZoomLevel(0),
             },
         ],
     },
@@ -109,34 +97,25 @@ const menuTemplate = () => [
         submenu: [
             {
                 label: 'Documentation',
-                click: () => {
-                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki');
-                },
+                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki'),
             },
             {
-                label: 'Report a Bug',
-                click: () => {
-                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug');
-                },
+                label: 'Report Issue',
+                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug'),
             },
             {
                 label: 'Support',
-                click: () => {
-                    shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support');
-                },
+                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support'),
             },
             {
                 label: 'About',
-                click: () => {
-                    showAboutDialog();
-                },
+                click: () => showAboutDialog(),
             },
         ],
     },
 ];
 
 function openSettings() {
-    // Check if settings window already exists
     const settingsWindow = new BrowserWindow({
         width: 400,
         height: 400,
@@ -145,18 +124,23 @@ function openSettings() {
             contextIsolation: false,
         },
     });
-
-    settingsWindow.loadFile(path.join(__dirname, 'app/settings/settings.html')); // Load the settings modal
+    settingsWindow.loadFile(path.join(__dirname, 'app/settings/settings.html'));
 }
 
 function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'About',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.8\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.10\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
+
+app.whenReady().then(() => {
+    const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
+    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
+    createWindow(urlToLoad);
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -166,6 +150,25 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (mainWindow === null) {
-        createWindow(); // Create a new window if none exists
+        createWindow();
+    }
+});
+
+app.setAsDefaultProtocolClient('jgdesktop');
+
+// Handle deep linking if app is already running
+app.on('second-instance', (event, argv) => {
+    const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
+    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
+
+    if (mainWindow) {
+        if (isAllowedUrl(urlToLoad)) {
+            mainWindow.loadURL(urlToLoad);
+        } else {
+            dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
+        }
+        mainWindow.focus();
+    } else {
+        createWindow(urlToLoad);
     }
 });
