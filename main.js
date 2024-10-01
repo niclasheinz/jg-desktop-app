@@ -71,7 +71,7 @@ function isAllowedUrl(url) {
 // Menu template
 const menuTemplate = () => [
     {
-        label: 'File',
+        label: 'Datei',
         submenu: [
             { label: 'Reload Page', click: () => mainWindow.reload() },
             { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
@@ -80,56 +80,56 @@ const menuTemplate = () => [
         ],
     },
     {
-        label: 'Edit',
+        label: 'Bearbeiten',
         submenu: [
-            { role: 'undo' },
-            { role: 'redo' },
+            { role: 'Rückgängig' },
+            { role: 'Wiederherstellen' },
             { type: 'separator' },
-            { role: 'cut' },
-            { role: 'copy' },
-            { role: 'paste' },
+            { role: 'Ausschneiden' },
+            { role: 'Kopieren' },
+            { role: 'Einfügen' },
         ],
     },
     {
-        label: 'View',
+        label: 'Ansicht',
         submenu: [
             {
-                label: 'Zoom In',
+                label: 'Hereinzoom',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
                 },
             },
             {
-                label: 'Zoom Out',
+                label: 'Hinauszoomen',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel - 1);
                 },
             },
             {
-                label: 'Reset Zoom',
+                label: 'Zoom zurücksetzen',
                 click: () => mainWindow.webContents.setZoomLevel(0),
             },
         ],
     },
     {
-        label: 'Help',
+        label: 'Hilfe',
         submenu: [
+          //  {
+          //      label: 'Dokumentation',
+          //      click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki'),
+          //  },
             {
-                label: 'Documentation',
-                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki'),
-            },
-            {
-                label: 'Report Issue',
+                label: 'Fehler melden',
                 click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug'),
             },
+            //{
+            //    label: 'Support',
+            //    click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support'),
+            //},
             {
-                label: 'Support',
-                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support'),
-            },
-            {
-                label: 'About',
+                label: 'Über',
                 click: () => showAboutDialog(),
             },
         ],
