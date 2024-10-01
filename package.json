@@ -1,90 +1,67 @@
 {
-    "name": "jg-desktop-app",
+    "name": "jg-desktop",
     "version": "1.0.10",
-    "description": "The official Jubla Glattbrugg Desktop App.",
+    "description": "The official desktop app for Jubla Glattbrugg",
     "main": "main.js",
     "scripts": {
-      "start": "electron .",
-      "build": "electron-builder",
-      "build:linux": "electron-builder --linux",
-      "lint": "eslint .",
-      "test": "jest"
+        "start": "electron .",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win",
+        "build:mac": "electron-builder --mac",
+        "build:linux": "electron-builder --linux"
     },
-    "keywords": [
-      "electron",
-      "desktop",
-      "app"
-    ],
-    "author": "Your Name",
-    "license": "MIT",
-    "homepage": "https://jublaglattbrugg.ch",
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/niclasheinz/jg-desktop-app.git"
+        "type": "git",
+        "url": "git+ssh://git@gitlab.com/niclasheinz/jg-desktop-app.git"
     },
+    "author": {
+        "name": "Niclas Heinz",
+        "email": "niclas.heinz@hpost.net"
+    },
+    "license": "ISC",
     "bugs": {
-      "url": "https://github.com/niclasheinz/jg-desktop-app/issues"
+        "url": "https://gitlab.com/niclasheinz/jg-desktop-app/issues"
+    },
+    "homepage": "https://gitlab.com/niclasheinz/jg-desktop-app#readme",
+    "devDependencies": {
+        "electron": "v31.3.0",
+        "electron-builder": "^24.13.3"
     },
     "dependencies": {
-      "electron-updater": "^6.3.4"
-    },
-    "devDependencies": {
-      "electron": "^25.3.0",
-      "electron-builder": "^24.6.0",
-      "eslint": "^8.20.0",
-      "jest": "^29.0.0"
+        "i18next": "^23.12.2"
     },
     "build": {
-      "appId": "com.jublaglattbrugg.desktop",
-      "productName": "Jubla Glattbrugg Desktop App",
-      "files": [
-        "main.js",
-        "build/**/*",
-        "app/**/*"
-      ],
-      "icon": "build/icons/icon.ico",
-      "linux": {
-        "target": [
-          {
-            "target": "AppImage",
-            "arch": [
-              "x64"
-            ]
-          }
+        "appId": "ch.niclasheinz.jg-desktop",
+        "productName": "JG Desktop",
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb"
+            ],
+            "icon": "build/icons/icon.png",
+            "category": "Utility"
+        },
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "icon": "build/icons/icon.png",
+            "category": "public.app-category.utilities"
+        },
+        "win": {
+            "target": [
+                "nsis",
+                "zip"
+            ],
+            "icon": "build/icons/icon.png",
+            "publisherName": "Niclas Heinz"
+        },
+        "protocols": [
+            {
+                "name": "Jubla Glattbrugg Protocol",
+                "schemes": ["jgdesktop"]
+            }
         ]
-      },
-      "mac": {
-        "target": "dmg"
-      },
-      "win": {
-        "target": "nsis",
-        "icon": "build/icons/icon.ico"
-      },
-      "publish": [
-        {
-          "provider": "github",
-          "owner": "niclasheinz",
-          "repo": "jg-desktop-app"
-        }
-      ]
-    },
-    "eslintConfig": {
-      "extends": "eslint:recommended",
-      "env": {
-        "node": true,
-        "es6": true
-      },
-      "rules": {
-        "no-console": "off"
-      }
-    },
-    "jgdesktop": {
-      "protocols": [
-        {
-          "name": "Jubla Glattbrugg Protocol",
-          "schemes": ["jgdesktop"]
-        }
-      ]
     }
-  }
-  
+}
