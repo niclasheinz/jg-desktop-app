@@ -1,32 +1,21 @@
 const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
-const { autoUpdater } = require('electron-updater'); // Import autoUpdater
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow;
 let settings;
-
-// Define the path for config.json
 const configPath = path.join(__dirname, 'config.json');
 
-// Function to ensure the config.json file exists
 function ensureConfigFile() {
-    // Default config data
-    const defaultConfigData = {
-        enableProtocol: true // Default value
-    };
-
-    // Check if config.json exists, if not create it
+    const defaultConfigData = { enableProtocol: true };
     if (!fs.existsSync(configPath)) {
         fs.writeFileSync(configPath, JSON.stringify(defaultConfigData, null, 4));
     }
-
-    // Read settings from the config file
     const configFile = fs.readFileSync(configPath);
     settings = JSON.parse(configFile);
 }
 
-// Function to create the main application window
 function createWindow(url) {
     if (mainWindow) {
         mainWindow.focus();
@@ -53,11 +42,10 @@ function createWindow(url) {
         mainWindow = null;
     });
 
-    // Check for updates
-    autoUpdater.checkForUpdatesAndNotify(); // Check for updates on app start
+    autoUpdater.checkForUpdatesAndNotify();
 }
 
-// Function to load a URL into the window with a loader
+// Load a URL with a loader
 function loadUrlInWindow(window, url) {
     const loaderHtml = `
         <style>
@@ -75,10 +63,9 @@ function loadUrlInWindow(window, url) {
     });
 }
 
-// Menu template
 const menuTemplate = () => [
     {
-        label: 'Datei',
+        label: 'File',
         submenu: [
             { label: 'Reload Page', click: () => mainWindow.reload() },
             { label: 'Force Reload', click: () => mainWindow.webContents.reloadIgnoringCache() },
@@ -86,7 +73,7 @@ const menuTemplate = () => [
         ],
     },
     {
-        label: 'Bearbeiten',
+        label: 'Edit',
         submenu: [
             { role: 'undo' },
             { role: 'redo' },
@@ -97,54 +84,37 @@ const menuTemplate = () => [
         ],
     },
     {
-        label: 'Ansicht',
+        label: 'View',
         submenu: [
-            {
-                label: 'Hereinzoom',
-                click: () => {
-                    const currentZoomLevel = mainWindow.webContents.getZoomLevel();
-                    mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
-                },
-            },
-            {
-                label: 'Hinauszoomen',
-                click: () => {
-                    const currentZoomLevel = mainWindow.webContents.getZoomLevel();
-                    mainWindow.webContents.setZoomLevel(currentZoomLevel - 1);
-                },
-            },
-            {
-                label: 'Zoom zurücksetzen',
-                click: () => mainWindow.webContents.setZoomLevel(0),
-            },
+            { label: 'Zoom In', click: () => adjustZoom(1) },
+            { label: 'Zoom Out', click: () => adjustZoom(-1) },
+            { label: 'Reset Zoom', click: () => mainWindow.webContents.setZoomLevel(0) },
         ],
     },
     {
-        label: 'Hilfe',
+        label: 'Help',
         submenu: [
-            {
-                label: 'Fehler melden',
-                click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug'),
-            },
-            {
-                label: 'Über',
-                click: () => showAboutDialog(),
-            },
+            { label: 'Report Issue', click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug') },
+            { label: 'About', click: () => showAboutDialog() },
         ],
     },
 ];
 
-// Show About dialog
+function adjustZoom(amount) {
+    const currentZoomLevel = mainWindow.webContents.getZoomLevel();
+    mainWindow.webContents.setZoomLevel(currentZoomLevel + amount);
+}
+
 function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
         title: 'About',
-        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.10\nThe official Jubla Glattbrugg Desktop App.',
+        message: 'Jubla Glattbrugg Desktop App\nVersion 1.0.15\nThe official Jubla Glattbrugg Desktop App.',
         buttons: ['OK'],
     });
 }
 
-// Auto-update events
+// Auto-update event listeners
 autoUpdater.on('update-available', () => {
     dialog.showMessageBox({
         type: 'info',
@@ -165,9 +135,18 @@ autoUpdater.on('update-downloaded', () => {
     });
 });
 
-// Ensure single instance of the app
+autoUpdater.on('error', (error) => {
+    console.error('Update error:', error);
+    dialog.showMessageBox({
+        type: 'error',
+        title: 'Update Error',
+        message: 'There was an error while checking for updates: ' + error.message,
+        buttons: ['OK'],
+    });
+});
+
 app.whenReady().then(() => {
-    ensureConfigFile(); // Ensure the config file is present
+    ensureConfigFile();
     createWindow('https://jublaglattbrugg.ch');
 });
 
@@ -185,25 +164,23 @@ app.on('activate', () => {
 
 app.setAsDefaultProtocolClient('jgdesktop');
 
-// Handle deep linking when app is already running
 app.on('second-instance', (event, argv) => {
     const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : null;
 
     if (mainWindow) {
-        if (urlToLoad === 'https://jublaglattbrugg.ch') {
+        if (urlToLoad) {
             loadUrlInWindow(mainWindow, urlToLoad);
         }
         mainWindow.focus();
     } else {
-        createWindow('https://jublaglattbrugg.ch');
+        createWindow(urlToLoad || 'https://jublaglattbrugg.ch');
     }
 });
 
-// IPC handlers for settings
 ipcMain.handle('get-settings', () => settings);
 
 ipcMain.on('save-settings', (event, newSettings) => {
     settings = newSettings;
-    fs.writeFileSync(configPath, JSON.stringify(settings, null, 4)); // Save settings to config file
+    fs.writeFileSync(configPath, JSON.stringify(settings, null, 4));
 });

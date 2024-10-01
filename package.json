@@ -1,6 +1,6 @@
 {
     "name": "jg-desktop",
-    "version": "1.0.14",
+    "version": "1.0.15", 
     "description": "The official desktop app for Jubla Glattbrugg",
     "main": "main.js",
     "scripts": {
@@ -24,7 +24,7 @@
     },
     "homepage": "https://gitlab.com/niclasheinz/jg-desktop-app#readme",
     "devDependencies": {
-        "electron": "v31.3.0",
+        "electron": "^31.3.0",
         "electron-builder": "^24.13.3",
         "electron-updater": "^5.2.0"  
     },
@@ -34,6 +34,11 @@
     "build": {
         "appId": "ch.niclasheinz.jg-desktop",
         "productName": "JG Desktop",
+        "files": [
+            "**/*",
+            "!**/*.map",
+            "!**/*.md"
+        ],
         "linux": {
             "target": [
                 "AppImage",
@@ -52,8 +57,7 @@
         },
         "win": {
             "target": [
-                "nsis",
-                "zip"
+                "nsis"
             ],
             "icon": "build/icons/icon.png",
             "publisherName": "Niclas Heinz"
