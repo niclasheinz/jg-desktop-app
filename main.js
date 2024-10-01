@@ -1,18 +1,17 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
 
 // Function to create the main application window
 function createWindow(url = 'https://jublaglattbrugg.ch') {
-    // If the window exists, focus and load the new URL
     if (mainWindow) {
         mainWindow.focus();
         loadUrlInWindow(mainWindow, url);
         return;
     }
 
-    // Create the BrowserWindow
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -23,24 +22,21 @@ function createWindow(url = 'https://jublaglattbrugg.ch') {
         },
     });
 
-    // Load the allowed URL and display loader
     if (isAllowedUrl(url)) {
         loadUrlInWindow(mainWindow, url);
     } else {
         dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
     }
 
-    // Create the menu
     const menu = Menu.buildFromTemplate(menuTemplate());
     Menu.setApplicationMenu(menu);
 
-    // Handle window closed event
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 }
 
-// Function to load a URL into the window with a loader
+// Load URL with a loader while waiting
 function loadUrlInWindow(window, url) {
     const loaderHtml = `
         <style>
@@ -51,9 +47,8 @@ function loadUrlInWindow(window, url) {
         <div class="loader"></div>
     `;
 
-    // Show loader until the page is ready
     window.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(loaderHtml)}`, { baseURLForDataURL: '' });
-    
+
     window.webContents.once('did-finish-load', () => {
         if (isAllowedUrl(url)) {
             window.loadURL(url);
@@ -68,7 +63,7 @@ function isAllowedUrl(url) {
     return allowedDomains.includes(parsedUrl.hostname);
 }
 
-// Menu template
+// Menu template definition
 const menuTemplate = () => [
     {
         label: 'Datei',
@@ -94,7 +89,7 @@ const menuTemplate = () => [
         label: 'Ansicht',
         submenu: [
             {
-                label: 'Hereinzoom',
+                label: 'Hereinzoomen',
                 click: () => {
                     const currentZoomLevel = mainWindow.webContents.getZoomLevel();
                     mainWindow.webContents.setZoomLevel(currentZoomLevel + 1);
@@ -116,18 +111,10 @@ const menuTemplate = () => [
     {
         label: 'Hilfe',
         submenu: [
-          //  {
-          //      label: 'Dokumentation',
-          //      click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-wiki'),
-          //  },
             {
                 label: 'Fehler melden',
                 click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-bug'),
             },
-            //{
-            //    label: 'Support',
-            //    click: () => shell.openExternal('https://www.jublaglattbrugg.ch/desktop-support'),
-            //},
             {
                 label: 'Über',
                 click: () => showAboutDialog(),
@@ -136,6 +123,7 @@ const menuTemplate = () => [
     },
 ];
 
+// Open settings window
 function openSettings() {
     const settingsWindow = new BrowserWindow({
         width: 400,
@@ -148,6 +136,7 @@ function openSettings() {
     settingsWindow.loadFile(path.join(__dirname, 'app/settings/settings.html'));
 }
 
+// Show about dialog
 function showAboutDialog() {
     dialog.showMessageBox({
         type: 'info',
@@ -162,6 +151,28 @@ app.whenReady().then(() => {
     const urlFromArgs = process.argv.find(arg => arg.startsWith('jgdesktop://'));
     const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
     createWindow(urlToLoad);
+    
+    // Check for updates after creating the window
+    autoUpdater.checkForUpdatesAndNotify();
+});
+
+// Prevent multiple instances
+app.requestSingleInstanceLock();
+
+// Handle second instance
+app.on('second-instance', (event, argv) => {
+    const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
+    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
+
+    // If the main window is already open, replace the session with the new URL
+    if (mainWindow) {
+        if (isAllowedUrl(urlToLoad)) {
+            loadUrlInWindow(mainWindow, urlToLoad);
+        } else {
+            dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
+        }
+        mainWindow.focus();
+    }
 });
 
 app.on('window-all-closed', () => {
@@ -178,19 +189,22 @@ app.on('activate', () => {
 
 app.setAsDefaultProtocolClient('jgdesktop');
 
-// Handle deep linking when app is already running
-app.on('second-instance', (event, argv) => {
-    const urlFromArgs = argv.find(arg => arg.startsWith('jgdesktop://'));
-    const urlToLoad = urlFromArgs ? urlFromArgs.replace('jgdesktop://', 'https://') : 'https://jublaglattbrugg.ch';
+// Auto-updater events
+autoUpdater.on('update-available', () => {
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Available',
+        message: 'A new update is available. Downloading now...'
+    });
+});
 
-    if (mainWindow) {
-        if (isAllowedUrl(urlToLoad)) {
-            loadUrlInWindow(mainWindow, urlToLoad);
-        } else {
-            dialog.showErrorBox('Invalid URL', 'This URL is not allowed.');
-        }
-        mainWindow.focus();
-    } else {
-        createWindow(urlToLoad);
-    }
+autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Ready',
+        message: 'A new update has been downloaded. The app will now restart to apply the update.',
+        buttons: ['Restart']
+    }).then(() => {
+        autoUpdater.quitAndInstall();
+    });
 });
